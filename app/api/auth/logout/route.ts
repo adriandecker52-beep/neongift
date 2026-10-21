@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+import { localRedirect } from "@/lib/redirect";
 import { clearCustomerCookie } from "@/lib/session";
 
 export const runtime = "nodejs";
 
-export async function POST(request: Request) {
+export async function POST() {
   await clearCustomerCookie();
-  return NextResponse.redirect(new URL("/", request.url), 303);
+  return localRedirect("/", 303);
 }

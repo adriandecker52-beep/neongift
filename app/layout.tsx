@@ -11,6 +11,7 @@ const orbitron = Orbitron({ subsets: ["latin"], weight: ["700", "900"], variable
 export const metadata: Metadata = {
   title: { default: "Neon Gift — Physical gift cards", template: "%s · Neon Gift" },
   description: "Physical PlayStation, Xbox, Nintendo, Steam, and Roblox gift cards. Shipped sealed. Pay with crypto through Trybit.",
+  other: { "trybit-verification": "3wiczr643a8pzn29masqwfkz9xbzwj5h" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
