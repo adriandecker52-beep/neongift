@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as { email?: string; password?: string } | null;
   try {
-    const account = loginCustomer(String(body?.email || ""), String(body?.password || ""));
+    const account = await loginCustomer(String(body?.email || ""), String(body?.password || ""));
     await setCustomerCookie({
       sub: account.id,
       email: account.email,

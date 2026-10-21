@@ -11,7 +11,7 @@ export const metadata = { title: "Checkout" };
 
 export default async function CheckoutPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const item = readDb().products.find((entry) => entry.id === id && entry.active);
+  const item = (await readDb()).products.find((entry) => entry.id === id && entry.active);
   if (!item) notFound();
   const customer = await currentCustomer();
 

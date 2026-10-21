@@ -43,7 +43,7 @@ export async function POST(request: Request) {
   const invoiceId = typeof data.invoice_id === "string" ? data.invoice_id : "";
   const orderId = typeof data.order_id === "string" ? data.order_id : "";
 
-  updateDb((db) => {
+  await updateDb((db) => {
     const order = (invoiceId && findByInvoice(db, invoiceId)) || (orderId && findOrder(db, orderId)) || null;
     if (!order) return;
     const info = data.invoice_info && typeof data.invoice_info === "object" ? data.invoice_info : null;

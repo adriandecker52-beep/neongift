@@ -10,12 +10,12 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return { title: readDb().products.find((item) => item.id === id)?.name ?? "Card" };
+  return { title: (await readDb()).products.find((item) => item.id === id)?.name ?? "Card" };
 }
 
 export default async function CardPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const item = readDb().products.find((entry) => entry.id === id && entry.active);
+  const item = (await readDb()).products.find((entry) => entry.id === id && entry.active);
   if (!item) notFound();
   const brand = brandOf(item.brand);
 

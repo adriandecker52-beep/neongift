@@ -11,7 +11,7 @@ type Context = { params: Promise<{ id: string }> };
 export async function POST(request: Request, context: Context) {
   const { id } = await context.params;
   const body = (await request.json().catch(() => null)) as { k?: string; coin?: string } | null;
-  const order = findOrder(readDb(), id);
+  const order = findOrder(await readDb(), id);
   if (!canView(order, body?.k)) {
     return NextResponse.json({ error: "Order not found." }, { status: 404 });
   }
@@ -19,7 +19,7 @@ export async function POST(request: Request, context: Context) {
   try {
     const coin = String(body?.coin || "");
     assertCoin(coin);
-    reopenForNewInvoice(id);
+    await reopenForNewInvoice(id);
     await issueInvoice(id, coin);
     return NextResponse.json({ ok: true });
   } catch (error) {

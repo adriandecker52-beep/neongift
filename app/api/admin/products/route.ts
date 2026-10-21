@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   if (!(price >= 1 && price <= 5000)) return NextResponse.json({ error: "Price must be between $1 and $5,000." }, { status: 400 });
   if (!Number.isInteger(stock) || stock < 0 || stock > 100000) return NextResponse.json({ error: "Stock must be a whole number." }, { status: 400 });
 
-  const id = updateDb((db) => {
+  const id = await updateDb((db) => {
     const created = {
       id: nid("card"),
       brand,

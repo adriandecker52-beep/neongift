@@ -7,7 +7,7 @@ export const runtime = "nodejs";
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as { name?: string; email?: string; password?: string } | null;
   try {
-    const account = registerCustomer({
+    const account = await registerCustomer({
       name: String(body?.name || ""),
       email: String(body?.email || ""),
       password: String(body?.password || ""),

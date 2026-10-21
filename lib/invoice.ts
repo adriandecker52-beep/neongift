@@ -21,7 +21,7 @@ export async function issueInvoice(orderId: string, coin: string) {
   }
   assertCoin(coin);
 
-  const order = findOrder(readDb(), orderId);
+  const order = findOrder(await readDb(), orderId);
   if (!order) throw new InvoiceError("Order not found.", 404);
 
   try {
@@ -31,14 +31,14 @@ export async function issueInvoice(orderId: string, coin: string) {
       email: order.email,
       coin,
     });
-    updateDb((db) => {
+    await updateDb((db) => {
       const current = findOrder(db, orderId);
       if (!current) return;
       current.payment = payment;
       if (current.status === "expired" || current.status === "failed") current.status = "awaiting_payment";
     });
   } catch (error) {
-    updateDb((db) => {
+    await updateDb((db) => {
       const current = findOrder(db, orderId);
       if (current && (isOpen(current) || current.status === "failed") && !current.payment) {
         releaseStock(db, current);
@@ -50,7 +50,7 @@ export async function issueInvoice(orderId: string, coin: string) {
   }
 }
 
-export function reopenForNewInvoice(orderId: string) {
+export async function reopenForNewInvoice(orderId: string) {
   return updateDb((db) => {
     const order = findOrder(db, orderId);
     if (!order) throw new InvoiceError("Order not found.", 404);

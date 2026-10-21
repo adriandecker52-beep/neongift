@@ -17,7 +17,7 @@ export default async function OrderPage({
 }) {
   const { id } = await params;
   const { k } = await searchParams;
-  const order = findOrder(readDb(), id);
+  const order = findOrder(await readDb(), id);
 
   if (!canView(order, k)) {
     return (

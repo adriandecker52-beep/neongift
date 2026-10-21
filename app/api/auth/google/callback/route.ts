@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { cookies } from "next/headers";
+import { saveGoogleCustomer } from "@/lib/accounts";
 import { exchangeGoogleCode } from "@/lib/google";
 import { localRedirect } from "@/lib/redirect";
 import { openToken, setCustomerCookie } from "@/lib/session";
@@ -27,6 +28,7 @@ export async function GET(request: Request) {
 
   try {
     const profile = await exchangeGoogleCode(code, saved.verifier);
+    await saveGoogleCustomer(profile);
     await setCustomerCookie({ ...profile, sub: `google:${profile.sub}`, provider: "google", emailVerified: true });
   } catch (error) {
     return fail(error instanceof Error && error.message === "email_not_verified" ? "unverified" : "failed");

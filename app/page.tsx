@@ -22,8 +22,8 @@ function RailHead({ title, href }: { title: string; href: string }) {
   );
 }
 
-export default function HomePage() {
-  const products = readDb().products.filter((item) => item.active);
+export default async function HomePage() {
+  const products = (await readDb()).products.filter((item) => item.active);
   const brandRows = BRANDS.map((brand) => {
     const prices = products.filter((item) => item.brand === brand.slug && item.stock > 0).map((item) => item.price);
     return { brand, from: prices.length ? Math.min(...prices) : 0 };

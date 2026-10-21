@@ -18,7 +18,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   }
 
   const { show } = await searchParams;
-  const db = readDb();
+  const db = await readDb();
   const toShip = db.orders.filter((order) => order.status === "paid");
   const visible = show === "all" ? db.orders : db.orders.filter((order) => !["expired", "canceled", "failed"].includes(order.status));
   const revenue = db.orders

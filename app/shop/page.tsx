@@ -17,7 +17,7 @@ export default async function ShopPage({
   const brand = params.brand && isBrand(params.brand) ? params.brand : "";
   const sort = params.sort === "low" || params.sort === "high" ? params.sort : "popular";
 
-  const items = readDb().products.filter((item) => {
+  const items = (await readDb()).products.filter((item) => {
     if (!item.active) return false;
     if (brand && item.brand !== brand) return false;
     if (!needle) return true;

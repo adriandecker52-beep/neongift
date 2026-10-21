@@ -18,7 +18,7 @@ export async function PATCH(request: Request, context: Context) {
   } | null;
 
   try {
-    updateDb((db) => {
+    await updateDb((db) => {
       const product = db.products.find((item) => item.id === id);
       if (!product) throw new Error("Card not found.");
       if (body?.price !== undefined) {

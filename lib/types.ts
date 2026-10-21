@@ -82,12 +82,15 @@ export type CustomerAccount = {
   id: string;
   email: string;
   name: string;
+  /** Empty for accounts that only sign in with Google. */
   passwordHash: string;
+  /** Google account id; empty if the customer never used Google sign-in. */
+  googleId: string;
   createdAt: string;
+  lastLoginAt: string | null;
 };
 
 export type DB = {
-  schema: number;
   products: Product[];
   orders: Order[];
   customers: CustomerAccount[];

@@ -33,7 +33,7 @@ export async function POST(request: Request) {
 
   try {
     assertCoin(coin);
-    const order = updateDb((db) => {
+    const order = await updateDb((db) => {
       const product = db.products.find((item) => item.id === productId && item.active);
       if (!product) throw new InvoiceError("That card is no longer available.");
       if (product.stock < qty) throw new InvoiceError(`Only ${product.stock} left in stock.`);

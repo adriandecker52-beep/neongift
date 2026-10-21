@@ -18,7 +18,7 @@ export async function PATCH(request: Request, context: Context) {
   const action = String(body?.action || "");
 
   try {
-    updateDb((db) => {
+    await updateDb((db) => {
       const order = findOrder(db, id);
       if (!order) throw new Error("Order not found.");
       if (action === "ship") {

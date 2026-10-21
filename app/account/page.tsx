@@ -11,7 +11,7 @@ export default async function AccountPage() {
   const customer = await currentCustomer();
   if (!customer) redirect("/login?next=/account");
 
-  const orders = readDb()
+  const orders = (await readDb())
     .orders.filter(
       (order) => order.customerId === customer.sub || (customer.emailVerified && order.email.toLowerCase() === customer.email),
     )

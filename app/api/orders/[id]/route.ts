@@ -11,7 +11,7 @@ type Context = { params: Promise<{ id: string }> };
 export async function GET(request: Request, context: Context) {
   const { id } = await context.params;
   const key = new URL(request.url).searchParams.get("k");
-  const existing = findOrder(readDb(), id);
+  const existing = findOrder(await readDb(), id);
   if (!canView(existing, key)) {
     return NextResponse.json({ error: "Order not found." }, { status: 404 });
   }
@@ -19,7 +19,7 @@ export async function GET(request: Request, context: Context) {
   if (trybitConfigured() && isOpen(existing) && existing.payment?.invoice) {
     try {
       const info = await fetchTrybitInvoice(existing.payment.invoice);
-      updateDb((db) => {
+      await updateDb((db) => {
         const order = findOrder(db, id);
         if (!order) return;
         if (info) applyInvoiceInfo(db, order, info);
@@ -30,6 +30,6 @@ export async function GET(request: Request, context: Context) {
     }
   }
 
-  const order = findOrder(readDb(), id);
+  const order = findOrder(await readDb(), id);
   return NextResponse.json(order ? toPublicOrder(order) : null);
 }

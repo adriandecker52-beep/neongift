@@ -48,7 +48,7 @@ function recordFailure(key: string) {
   failures.set(key, { count, first: fresh ? now : entry.first, until: count >= MAX_FAILURES ? now + LOCK_MS : 0 });
 }
 
-export function registerCustomer(input: { name: string; email: string; password: string }): CustomerAccount {
+export async function registerCustomer(input: { name: string; email: string; password: string }): Promise<CustomerAccount> {
   const name = input.name.replace(/\s+/g, " ").trim().slice(0, 80);
   const email = input.email.trim().toLowerCase();
   if (name.length < 2) throw new AccountError("Enter your name.");
@@ -58,25 +58,54 @@ export function registerCustomer(input: { name: string; email: string; password:
 
   const passwordHash = hashPassword(input.password);
   return updateDb((db) => {
-    if (db.customers.some((account) => account.email === email)) {
-      throw new AccountError("An account with this email already exists. Sign in instead.", 409);
+    const existing = db.customers.find((account) => account.email === email);
+    if (existing && !existing.passwordHash) {
+      throw new AccountError("This email signs in with Google. Use Continue with Google instead.", 409);
     }
-    const account: CustomerAccount = { id: nid("cus"), email, name, passwordHash, createdAt: new Date().toISOString() };
+    if (existing) throw new AccountError("An account with this email already exists. Sign in instead.", 409);
+    const now = new Date().toISOString();
+    const account: CustomerAccount = { id: nid("cus"), email, name, passwordHash, googleId: "", createdAt: now, lastLoginAt: now };
     db.customers.push(account);
     return account;
   });
 }
 
-export function loginCustomer(emailInput: string, password: string): CustomerAccount {
+export async function loginCustomer(emailInput: string, password: string): Promise<CustomerAccount> {
   const email = emailInput.trim().toLowerCase();
   const key = `login:${email}`;
   checkLock(key);
-  const account = readDb().customers.find((entry) => entry.email === email);
-  const ok = verifyPassword(password, account?.passwordHash ?? DUMMY_HASH) && Boolean(account);
+  const account = (await readDb()).customers.find((entry) => entry.email === email);
+  const ok = verifyPassword(password, account?.passwordHash || DUMMY_HASH) && Boolean(account?.passwordHash);
   if (!ok || !account) {
     recordFailure(key);
     throw new AccountError("Wrong email or password.", 401);
   }
   failures.delete(key);
+  await touchLogin(account.id);
   return account;
+}
+
+async function touchLogin(id: string) {
+  await updateDb((db) => {
+    const account = db.customers.find((entry) => entry.id === id);
+    if (account) account.lastLoginAt = new Date().toISOString();
+  });
+}
+
+export async function saveGoogleCustomer(profile: { sub: string; email: string; name: string }): Promise<CustomerAccount> {
+  const email = profile.email.trim().toLowerCase();
+  const name = profile.name.replace(/\s+/g, " ").trim().slice(0, 80) || email;
+  return updateDb((db) => {
+    const now = new Date().toISOString();
+    const account =
+      db.customers.find((entry) => entry.googleId === profile.sub) ?? db.customers.find((entry) => entry.email === email);
+    if (account) {
+      account.googleId = profile.sub;
+      account.lastLoginAt = now;
+      return account;
+    }
+    const created: CustomerAccount = { id: nid("cus"), email, name, passwordHash: "", googleId: profile.sub, createdAt: now, lastLoginAt: now };
+    db.customers.push(created);
+    return created;
+  });
 }
