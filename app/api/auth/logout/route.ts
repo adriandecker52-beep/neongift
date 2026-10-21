@@ -1,9 +1,10 @@
 import { localRedirect } from "@/lib/redirect";
 import { clearCustomerCookie } from "@/lib/session";
+import { appUrl } from "@/lib/trybit";
 
 export const runtime = "nodejs";
 
 export async function POST() {
   await clearCustomerCookie();
-  return localRedirect("/", 303);
+  return NextResponse.redirect(new URL("/", appUrl()), 303);
 }
