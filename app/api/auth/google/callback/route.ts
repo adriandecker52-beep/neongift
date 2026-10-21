@@ -3,7 +3,6 @@ import { cookies } from "next/headers";
 import { exchangeGoogleCode } from "@/lib/google";
 import { localRedirect } from "@/lib/redirect";
 import { openToken, setCustomerCookie } from "@/lib/session";
-import { appUrl } from "@/lib/trybit";
 
 export const runtime = "nodejs";
 
@@ -19,7 +18,7 @@ export async function GET(request: Request) {
   const saved = openToken<{ state: string; verifier: string; next: string }>(jar.get("nx_oauth")?.value);
   jar.delete({ name: "nx_oauth", path: "/api/auth/google" });
 
-  const fail = (reason: string) => NextResponse.redirect(new URL(`/login?error=${reason}`, appUrl()));
+  const fail = (reason: string) => localRedirect(`/login?error=${reason}`);
   if (url.searchParams.get("error")) return fail("denied");
 
   const code = url.searchParams.get("code");
@@ -32,5 +31,5 @@ export async function GET(request: Request) {
   } catch (error) {
     return fail(error instanceof Error && error.message === "email_not_verified" ? "unverified" : "failed");
   }
-  return NextResponse.redirect(new URL(saved.next, appUrl()));
+  return localRedirect(saved.next);
 }
