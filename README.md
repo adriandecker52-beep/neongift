@@ -4,6 +4,8 @@ Dark, game-themed store for **physical** gaming gift cards. Payment is crypto on
 
 ## Run it
 
+The store needs a MySQL 8+ database. Set `DATABASE_URL` (or Railway's `MYSQL_URL`), e.g. `mysql://user:pass@localhost:3306/neongift`.
+
 ```bash
 npm install
 npm run dev
@@ -43,4 +45,8 @@ Trybit only delivers notifications to ports 80/443, so localhost needs a public 
 
 Partial payments keep the order on hold. Expired invoices put the stock back, and the buyer can request a new address. Buyers find orders again at `/track` with their order number and email.
 
-Orders and inventory are stored in `data/store.json`. Back up that file, or move to a real database before taking real volume.
+## Data
+
+Products, orders, and customers (email and Google sign-ins) live in MySQL, in the `products`, `orders`, and `customers` tables. The app creates the tables on first start. If the database is empty, it imports `data/store.json` when present, otherwise the default card list.
+
+The app keeps a copy of the data in memory and writes every change to MySQL in a transaction before responding. Run a single app instance, and restart it after editing rows directly in MySQL.
